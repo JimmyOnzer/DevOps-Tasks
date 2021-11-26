@@ -217,4 +217,44 @@ sudo service nginx reload
 ![permission](./img/drop6a.png)
 ![permission](./img/drop7.png)
 
-- Obtain an SSL certificate
+- Obtain an SSL certificate using Let’s Encrypt
+
+```
+sudo apt-get install -y certbot python-certbot-nginx
+
+```
+
+- obtaining the certificate
+
+```
+sudo certbot certonly --nginx -d calvinpuram.com
+```
+
+- The certonly option tells certbot not to install the certificate once issued.
+- The --nginx flag indicates to Certbot that I configured the web server using Nginx, and it’ll
+  use the python-certbot-nginx package I installed.
+- The -d command defines the domain
+
+* The above command generates a folder /etc/letsencrypt/live/calvinpuram.com and
+  places some files in it:
+
+  - privkey.pem : The private key for your certificate. Used to decrypt data signed using the public
+    key (certificate) from the user’s browser.
+  - fullchain.pem: It refers to the certificate file sent to clients
+
+* Automating certificate renewals
+  When Certbot issue certificates, it automatically creates a cron job to
+  renew certificates.
+
+  ```
+  sudo certbot renew --dry-run
+  ```
+
+* Securing nginx
+  The next step is configuring Nginx to serve the site using this certificate. I modify the Nginx configuration to
+  serve this certificate.
+
+  ```
+  sudo nano /etc/nginx/sites-available/calvinpuram.com
+  sudo service nginx reload
+  ```
