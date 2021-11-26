@@ -212,7 +212,9 @@ then reload nginx
 sudo service nginx reload
 ```
 
-@ setup DNS record in DigitalOcean
+- setup DNS record in DigitalOcean
 
 ![permission](./img/drop6a.png)
 ![permission](./img/drop7.png)
+
+- Obtain an SSL certificate
