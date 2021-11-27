@@ -98,10 +98,10 @@ A firewall is a digital security system that checks all incoming and outgoing tr
 
 The Domain Name System (DNS) Server is a server that is specifically used for matching website hostnames (like example.com)to their corresponding Internet Protocol or IP addresses. The DNS server contains a database of public IP addresses and their corresponding domain names. Every device connected to the internet has a unique IP address that helps to identify it, according to the IPv4 or IPV6 protocols. DNS servers help us avoid memorization of such long numbers in IP addresses (and even more complex alphanumeric ones in the IPV6 system) as they automatically translate the website names we enter into the browser address bar into these numbers so that the servers can load the right web pages.
 
-## 7. Serve a simple application running on any random port (eg: 3000) via Nginx
+## 7. Deploy a fullstack application to DigitalOcean using Github Actions
 
 <br>
-Configure and serve a static HTML site using Nginx. This project is called More Recipes
+For the purpose of this task I will setup a react application using "create-react-app" and a single Nodejs application and automate the deployment of this application to DigitalOcean using Github action.
 
 Step 1: Provision a remote server.
 
@@ -126,7 +126,7 @@ Step 1: Provision a remote server.
 * Connecting to a remote server
 
 ```
-ssh root@104.131.84.57 -i ~/.ssh/devops-ass
+ssh root@ip -i ~/.ssh/devops-ass
 
 ```
 
@@ -153,11 +153,28 @@ usermod -aG sudo deploy
   chown -R deploy:deploy /home/deploy
   ```
 
-* To install nginx, I’ll run the following command
+- Set up firewall
+
+```
+sudo ufw allow 22 # port for ssh
+sudo ufw allow 'Nginx Full' # port for http and https
+sudo ufw enable # enable firewall
+```
+
+- To install nginx, I’ll run the following command
+  Nginx is an open-source web server software. When web traffic comes into our server, we can
+  configure Nginx to handle this traffic appropriately. That can involve a lot of different tasks, such as
+  serving our actual website, caching the results of the request to enable much faster responses in
+  future, and load balancing
 
 ```
 sudo apt-get install -y nginx
 ```
+
+Now we can run `nginx -v` to confirm its installation.
+
+We can check the status of the Nginx service using `sudo service nginx status`. You should see Nginx
+running
 
 ![permission](./img/drop6.png)
 
@@ -169,28 +186,90 @@ sudo rm /etc/nginx/sites-available/default
 sudo rm -rf /var/www/html
 ```
 
-- Fetching the project source code
+- Setting up Github Action Runner
 
 ```
- cd ~
- git clone https://github.com/deploying-nodejs/more-recipes-static-site
+npx create-react-app #to create a new react application
 ```
 
-- Configuring Nginx for static sites using this config
+push the newly created file to github
+
+create `.github/workflows ` folder and define github actions jobs
+
+```
+
+
+name: Reactjs CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm i
+    - run: npm run build --if-present
+
+
+```
+
+Next is to setup Github Action runner on DigitalOcean
+step1: navigate to project settings on github and locate `actions` and click on "runners"
+![setting github runner](./img/ga1.png)
+step2: click on new self hosted runner and select linux as our operating system
+step3: follow the instruction below
+
+```
+# Create a folder
+$ mkdir actions-runner && cd actions-runner# Download the latest runner package
+$ curl -o actions-runner-linux-x64-2.284.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.284.0/actions-runner-linux-x64-2.284.0.tar.gz# Optional: Validate the hash
+$ echo "1ddfd7bbd3f2b8f5684a7d88d6ecb6de3cb2281a2a359543a018cc6e177067fc  actions-runner-linux-x64-2.284.0.tar.gz" | shasum -a 256 -c# Extract the installer
+$ tar xzf ./actions-runner-linux-x64-2.284.0.tar.gz
+```
+
+and run the following to configure the runner
+
+```
+# Create the runner and start the configuration experience
+$ ./config.sh --url https://github.com/calvin-puram/form-component --token AOMAJNFMSS5JHS5TTYRZWO3BUIKA6# Last step, run it!
+$ ./run.sh
+```
+
+confirm that our build is passing
+![setting github runner](./img/ga2.png)
+
+- Configuring Nginx to serve our react app
 
 ```
 server {
   listen 80;
-  root /home/deploy/more-recipes-static-site;
-  server_name calvinpuram.com;
+  root /home/deploy/actions-runner/_work/form-component/form-component/build;
+  server_name calvinpuram.hopto.org;
   location / {
   try_files $uri $uri/ =404;
   }
 }
 ```
 
-i. The root of our project point to the folder in which I cloned the source. In this case, it’s
-/home/deploy/more-recipes-static-site.
+i. The root of our project point to the folder in which we have our build. In this case, it’s
+/home/deploy/actions-runner/\_work/form-component/form-component/build.
 ii. The server_name match the domain of our site.
 
 iii. Running the following command to open a new configuration file
@@ -212,10 +291,7 @@ then reload nginx
 sudo service nginx reload
 ```
 
-- setup DNS record in DigitalOcean
-
-![permission](./img/drop6a.png)
-![permission](./img/drop7.png)
+![permission](./img/ga3.png)
 
 - Obtain an SSL certificate using Let’s Encrypt
 
