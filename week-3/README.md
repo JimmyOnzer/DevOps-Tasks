@@ -101,7 +101,7 @@ The Domain Name System (DNS) Server is a server that is specifically used for ma
 ## 7. Deploy a fullstack application to DigitalOcean using Github Actions
 
 <br>
-For the purpose of this task I will setup a react application using "create-react-app" and a single Nodejs application and automate the deployment of this application to DigitalOcean using Github action.
+For the purpose of this task I will setup a react application using "create-react-app" and automate the deployment of this application to DigitalOcean using Github action.
 
 Step 1: Provision a remote server.
 
@@ -275,14 +275,14 @@ ii. The server_name match the domain of our site.
 iii. Running the following command to open a new configuration file
 
 ```
-sudo nano /etc/nginx/sites-available/calvinpuram.com
+sudo nano /etc/nginx/sites-available/calvinpuram.hopto.org
 
 ```
 
 - create a symlink of the configuration file in the sites-enabled
 
 ```
-sudo ln -s /etc/nginx/sites-available/calvinpuram.com /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/calvinpuram.hopto.org /etc/nginx/sites-enabled/
 ```
 
 then reload nginx
@@ -296,14 +296,14 @@ sudo service nginx reload
 - Obtain an SSL certificate using Let’s Encrypt
 
 ```
-sudo apt-get install -y certbot python-certbot-nginx
+sudo apt-get install -y certbot python3-certbot-nginx
 
 ```
 
 - obtaining the certificate
 
 ```
-sudo certbot certonly --nginx -d calvinpuram.com
+sudo certbot certonly --nginx -d calvinpuram.hopto.org
 ```
 
 - The certonly option tells certbot not to install the certificate once issued.
@@ -311,7 +311,7 @@ sudo certbot certonly --nginx -d calvinpuram.com
   use the python-certbot-nginx package I installed.
 - The -d command defines the domain
 
-* The above command generates a folder /etc/letsencrypt/live/calvinpuram.com and
+* The above command generates a folder /etc/letsencrypt/live/calvinpuram.hopto.org and
   places some files in it:
 
   - privkey.pem : The private key for your certificate. Used to decrypt data signed using the public
@@ -331,6 +331,33 @@ sudo certbot certonly --nginx -d calvinpuram.com
   serve this certificate.
 
   ```
-  sudo nano /etc/nginx/sites-available/calvinpuram.com
+  sudo nano /etc/nginx/sites-available/calvinpuram.hopto.org
+
+  ```
+
+  update the configuration to allow https
+
+  ```
+  server {
+  #listen 80;
+  listen 443 ssl http2;
+  ssl_certificate
+  /etc/letsencrypt/live/calvinpuram.hopto.org/fullchain.pem;
+  ssl_certificate_key
+  /etc/letsencrypt/live/calvinpuram.hopto.org/privkey.pem;
+  root /home/deploy/actions-runner/_work/form-component/form-component/build;
+  server_name calvinpuram.hopto.org;
+  location / {
+  try_files $uri $uri/ =404;
+  }
+  }
+
+  ```
+
+  restart nginx server
+
+  ```
   sudo service nginx reload
   ```
+
+  ![permission](./img/conclusion.png)
