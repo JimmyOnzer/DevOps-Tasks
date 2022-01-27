@@ -1,0 +1,18 @@
+appName: productcatalogservice
+containerImage: gcr.io/google-samples/microservices-demo/productcatalogservice
+imageTag: v0.3.5
+containerPort: 3550
+containerENV:
+- name: PORT
+  value: "3550"
+  
+
+resourceCPU: 100m
+resourceMemory: 64Mi
+resourceLimitCPU: 200m
+resourceLimitMemory: 128Mi
+
+
+servicePort: 3550
+containerPort: 3550
+serviceType: ClusterIP

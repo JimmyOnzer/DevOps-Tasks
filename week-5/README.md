@@ -17,7 +17,7 @@ First of all, I create a Kubernetes cluster in AWS EKS using terraform where I d
 kubectl get node
 ```
 
-![eks-node](/img/eks1.png)
+![eks-node](./img/eks1.png)
 
 Step 2: Deploy Microservice application
 I will deploy a sample microservice application to our newly created cluster. I have gone ahead to set up a deployment and service file for these microservice in thesame folder of this task. 
@@ -37,12 +37,12 @@ And to see all the running microservice
 kubectl get pods
 ```
 
-![eks node](/img/eks3.png)
+![eks node](./img/eks3.png)
 
 A new cloud-native load balancer is created and we can use the external IP to access our app in the browser. Use the command below to get the external IP of the frontend service to access the app in the browser.
 
 ```
 kubectl get service
 ```
-![eks-node](/img/eks4.png)
+![eks-node](./img/eks4.png)
 
