@@ -22,7 +22,7 @@ kubectl get node
 Step 2: Deploy Microservice application
 I will deploy a sample microservice application to our newly created cluster. I have gone ahead to set up a deployment and service file for these microservice in thesame folder of this task. 
 
-![eks-node](/img/eks2.png)
+![eks-node](./img/eks2.png)
 
 Using the below command to deploy the application to the Kubernetes cluster
 
@@ -37,7 +37,7 @@ And to see all the running microservice
 kubectl get pods
 ```
 
-![eks-node](/img/eks3.png)
+![eks node](/img/eks3.png)
 
 A new cloud-native load balancer is created and we can use the external IP to access our app in the browser. Use the command below to get the external IP of the frontend service to access the app in the browser.
 
